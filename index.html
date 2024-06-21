@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spinny Wheel</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f0f0f0;
+            padding-left: 20px;
+            overflow: hidden;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+            z-index: 2;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .input-section {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        #name-input {
+            padding: 5px;
+            width: 150px;
+            margin-right: 10px;
+        }
+
+        .spin-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .spin-button:hover {
+            background: #0056b3;
+        }
+
+        #winner-notification {
+            font-size: 18px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .name-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .name-entry input {
+            width: 50px;
+            margin-left: 10px;
+        }
+
+        .set-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .remove-button {
+            background: #d9534f;
+            color: white;
+            border: none;
+            padding: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .spotlight {
+            font-size: 24px;
+            font-weight: bold;
+            color: #d9534f;
+            text-align: center;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .spotlight-circle {
+            width: 200px;
+            height: 200px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            animation: spotlight-animation 3s ease-in-out forwards;
+        }
+
+        @keyframes spotlight-animation {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        #shuffle-text {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: black;
+            display: none;
+            z-index: 1;
+        }
+
+        .settings-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+
+        .settings-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            width: 300px;
+        }
+
+        .settings-container h2 {
+            margin-top: 0;
+        }
+
+        .settings-container button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .settings-container button:hover {
+            background: #0056b3;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Spinny Wheel!</h1>
+        <div id="winner-notification"></div>
+        <div class="input-section">
+            <input type="text" id="name-input" placeholder="Enter name">
+            <button onclick="addName()">Enter</button>
+        </div>
+        <div id="names-list"></div>
+        <button class="spin-button" onclick="spin()">Spin!</button>
+    </div>
+
+    <div class="overlay" id="overlay">
+        <div class="spotlight-circle" id="spotlight-circle">
+            <div class="spotlight" id="spotlight"></div>
+        </div>
+    </div>
+    <div id="shuffle-text"></div>
+
+    <div class="settings-button" onclick="promptPassword()">⚙</div>
+
+    <div class="settings-overlay" id="settings-overlay">
+        <div class="settings-container">
+            <h2>Events!</h2>
+            <button onclick="unCapTickets()">Uncap 10 Limit</button>
+            <button onclick="rigRaffle()">Rig</button>
+            <button onclick="turnOffAdding()">Turn Off Adding</button>
+        </div>
+    </div>
+
+    <div class="footer">Coded by Noah</div>
+
+    <script>
+        const correctPassword = "debug";
+        const removePassword = "6Astaff";
+        let participants = [];
+        let shuffleInterval;
+
+        function addName() {
+            const nameInput = document.getElementById('name-input');
+            const name = nameInput.value.trim();
+            if (name !== '') {
+                participants.push({ name: name, tickets: 1 });
+                updateParticipantsList();
+                nameInput.value = '';
+            }
+        }
+
+        function updateParticipantsList() {
+            const namesList = document.getElementById('names-list');
+            namesList.innerHTML = '';
+            participants.forEach((participant, index) => {
+                namesList.innerHTML += `
+                    <div class="name-entry">
+                        <span>${participant.name}</span>
+                        <input type="number" min="1" max="15" value="${participant.tickets}" id="tickets-${index}">
+                        <button class="set-button" onclick="setTickets(${index})">Set</button>
+                        <button class="remove-button" onclick="promptRemovePassword(${index})">X</button>
+                    </div>
+                `;
+            });
+        }
+
+        function setTickets(index) {
+            const ticketsInput = document.getElementById(`tickets-${index}`);
+            const tickets = parseInt(ticketsInput.value);
+            if (tickets >= 1 && tickets <= 500) {
+                participants[index].tickets = tickets;
+            } else {
+                ticketsInput.value = participants[index].tickets;
+            }
+        }
+
+        function spin() {
+            const winnerNotification = document.getElementById('winner-notification');
+            const shuffleText = document.getElementById('shuffle-text');
+            winnerNotification.innerHTML = '';
+            shuffleText.style.display = 'block';
+
+            if (participants.length === 0) return;
+
+            const ticketArray = [];
+            participants.forEach(participant => {
+                for (let i = 0; i < participant.tickets; i++) {
+                    ticketArray.push(participant.name);
+                }
+            });
+
+            let shuffleTime = 0;
+            shuffleInterval = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * ticketArray.length);
+                shuffleText.innerHTML = ticketArray[randomIndex];
+                shuffleTime += 100;
+                if (shuffleTime >= 5000) {
+                    clearInterval(shuffleInterval);
+                    shuffleText.style.display = 'none';
+                    revealWinner(ticketArray[randomIndex]);
+                }
+            }, 100);
+        }
+
+        function revealWinner(winner) {
+            const overlay = document.getElementById('overlay');
+            const spotlight = document.getElementById('spotlight');
+            const spotlightCircle = document.getElementById('spotlight-circle');
+
+            overlay.style.display = 'flex';
+            spotlightCircle.style.opacity = '1';
+            setTimeout(() => {
+                spotlight.innerHTML = `${winner} has won!`;
+            }, 3000);
+
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                spotlightCircle.style.opacity = '0';
+                spotlight.innerHTML = '';
+            }, 6000);
+        }
+
+        function openSettings() {
+            document.getElementById('settings-overlay').style.display = 'flex';
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-overlay').style.display = 'none';
+        }
+
+        function unCapTickets() {
+            const ticketInputs = document.querySelectorAll('.name-entry input');
+            ticketInputs.forEach(input => {
+                input.removeAttribute('max');
+            });
+            closeSettings();
+        }
+
+        function rigRaffle() {
+            const name = prompt('Enter the name to rig:');
+            if (participants.some(participant => participant.name === name)) {
+                revealWinner(name);
+            } else {
+                alert('Name not found.');
+            }
+            closeSettings();
+        }
+
+        function turnOffAdding() {
+            const nameInput = document.getElementById('name-input');
+            const enterButton = document.querySelector('.input-section button');
+            if (nameInput.disabled) {
+                nameInput.removeAttribute('disabled');
+                enterButton.removeAttribute('disabled');
+            } else {
+                nameInput.setAttribute('disabled', 'true');
+                enterButton.setAttribute('disabled', 'true');
+            }
+            closeSettings();
+        }
+
+        function promptPassword() {
+            const password = prompt("Enter password:");
+            if (password === correctPassword) {
+                openSettings();
+            } else {
+                alert("Incorrect password. Access denied.");
+            }
+        }
+
+        function promptRemovePassword(index) {
+            const password = prompt("Enter password to remove:");
+            if (password === removePassword) {
+                participants.splice(index, 1);
+                updateParticipantsList();
+            } else {
+                alert("Incorrect password. Removal denied.");
+            }
+        }
+    </script>
+</body>
+</html>
